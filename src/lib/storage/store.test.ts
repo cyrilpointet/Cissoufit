@@ -63,6 +63,16 @@ describe('backup', () => {
     expect(createStore({ key: 'a', version: 1, defaultValue: 0 }).get()).toBe(5)
   })
 
+  it('remplace les données existantes à l’import', () => {
+    const backup = exportBackup() // sauvegarde vide
+    createStore({ key: 'a', version: 1, defaultValue: 0 }).set(5)
+    localStorage.setItem('autre-app', 'x')
+
+    importBackup(backup)
+    expect(localStorage.getItem(`${STORAGE_PREFIX}a`)).toBeNull()
+    expect(localStorage.getItem('autre-app')).toBe('x')
+  })
+
   it('refuse un fichier invalide', () => {
     expect(() => importBackup({ foo: 'bar' })).toThrow()
   })

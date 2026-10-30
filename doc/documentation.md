@@ -26,14 +26,14 @@ Noter chaque jour les exercices de fitness réalisés, et pouvoir consulter l'hi
 
 | #  | Fonctionnalité | Description | Statut |
 | -- | -------------- | ----------- | ------ |
-| F1 | Saisie d'une réalisation | Enregistrer un exercice réalisé : choisir un exercice existant, ou en créer un nouveau, puis saisir sa valeur et sa date (aujourd'hui par défaut) | À faire |
-| F2 | Pré-remplissage | Quand on choisit un exercice, la valeur est pré-remplie avec la dernière valeur enregistrée pour cet exercice | À faire |
-| F3 | Création d'exercice | Créer un nouvel exercice (nom et unité) directement depuis la saisie ; il rejoint ensuite la liste des exercices disponibles | À faire |
-| F4 | Historique par date | Consulter les exercices passés, regroupés par jour (du plus récent au plus ancien) | À faire |
-| F5 | Historique par exercice | Consulter les exercices passés, regroupés par exercice, chaque réalisation avec sa date | À faire |
-| F6 | Modifier / supprimer une réalisation | Changer la valeur ou la date d'une réalisation, ou la supprimer | À faire |
-| F7 | Gérer les exercices | Renommer un exercice, changer son unité, ou le supprimer (avec ses réalisations, après confirmation) | À faire |
-| F8 | Sauvegarde | Exporter toutes les données dans un fichier JSON, et les restaurer depuis un tel fichier | À faire |
+| F1 | Saisie d'une réalisation | Enregistrer un exercice réalisé : choisir un exercice existant, ou en créer un nouveau, puis saisir sa valeur et sa date (aujourd'hui par défaut) | ✅ Fait |
+| F2 | Pré-remplissage | Quand on choisit un exercice, la valeur est pré-remplie avec la dernière valeur enregistrée pour cet exercice | ✅ Fait |
+| F3 | Création d'exercice | Créer un nouvel exercice (nom et unité) directement depuis la saisie ; il rejoint ensuite la liste des exercices disponibles | ✅ Fait |
+| F4 | Historique par date | Consulter les exercices passés, regroupés par jour (du plus récent au plus ancien) | ✅ Fait |
+| F5 | Historique par exercice | Consulter les exercices passés, regroupés par exercice, chaque réalisation avec sa date | ✅ Fait |
+| F6 | Modifier / supprimer une réalisation | Changer la valeur ou la date d'une réalisation, ou la supprimer | ✅ Fait |
+| F7 | Gérer les exercices | Renommer un exercice, changer son unité, ou le supprimer (avec ses réalisations, après confirmation) | ✅ Fait |
+| F8 | Sauvegarde | Exporter toutes les données dans un fichier JSON, et les restaurer depuis un tel fichier | ✅ Fait |
 
 ### 2.3 Modèle de données
 
@@ -55,26 +55,42 @@ Deux entités : le **catalogue d'exercices**, et les **réalisations** (un exerc
 | `id`         | `string` | UUID |
 | `exerciseId` | `string` | Référence un `Exercise` existant |
 | `date`       | `string` | Jour de réalisation, format `YYYY-MM-DD`, en heure locale |
-| `value`      | `number` | Obligatoire, nombre décimal |
+| `value`      | `number` | Obligatoire, nombre décimal positif ou nul |
 | `createdAt`  | `string` | Date ISO, sert à départager plusieurs réalisations le même jour |
 
-Stores prévus : `cissoufit:exercises` (`Exercise[]`) et `cissoufit:entries` (`Entry[]`). Ils seront ajoutés au registre (§3.4) une fois implémentés.
+Stores : `cissoufit:exercises` (`Exercise[]`) et `cissoufit:entries` (`Entry[]`), voir le registre (§3.4).
 
 > Une réalisation pointe vers son exercice par `exerciseId`, et non par son nom : on peut ainsi renommer un exercice sans perdre son historique.
 
 ### 2.4 Règles de gestion
 
-- **R1 — Valeur décimale :** la valeur est un nombre à virgule (ex. `12,5`). La saisie accepte la virgule comme le point, et l'affichage utilise la virgule (format `fr-FR`).
+- **R1 — Valeur décimale :** la valeur est un nombre à virgule (ex. `12,5`), positif ou nul. La saisie accepte la virgule comme le point, et l'affichage utilise la virgule (format `fr-FR`).
 - **R2 — Unité :** chaque exercice a une unité choisie à sa création, parmi `kg`, `min` et `km`. Elle s'affiche à côté de chaque valeur. L'app ne fait aucun calcul entre exercices différents.
 - **R3 — Pré-remplissage :** la valeur proposée est celle de la réalisation la plus récente de l'exercice (la date la plus récente, puis `createdAt` en cas d'égalité). Si l'exercice n'a jamais été réalisé, le champ est vide.
 - **R4 — Liste d'exercices :** on choisit dans le catalogue ou on crée un nouvel exercice. Si on essaie de créer un nom qui existe déjà (sans tenir compte de la casse), l'exercice existant est réutilisé.
 - **R5 — Date de saisie :** une réalisation est datée du jour par défaut. On peut choisir une date passée, en cas d'oubli, mais pas une date future.
-- **R6 — Plusieurs réalisations par jour :** un même exercice peut être enregistré autant de fois que voulu le même jour, par exemple pour plusieurs séries. Chaque réalisation est affichée séparément, dans l'ordre de saisie.
+- **R6 — Plusieurs réalisations par jour :** un même exercice peut être enregistré autant de fois que voulu le même jour, par exemple pour plusieurs séries. Chaque réalisation est affichée séparément, dans l'ordre de saisie. Après un enregistrement, l'exercice reste sélectionné pour enchaîner les séries.
 - **R7 — Modification :** une réalisation peut être modifiée (valeur et date) ou supprimée. Un exercice peut être renommé, en respectant l'unicité du nom, et son unité peut être changée.
 - **R8 — Suppression d'un exercice :** supprimer un exercice supprime aussi toutes ses réalisations. Avant de supprimer, l'app affiche un avertissement qui indique le nombre de réalisations concernées, et demande une confirmation.
 - **R9 — Sauvegarde :** un écran permet d'exporter toutes les données dans un fichier JSON (`cissoufit-YYYY-MM-DD.json`) et de les restaurer depuis un tel fichier. L'import **remplace** les données actuelles : l'app demande une confirmation avant, puis se recharge.
 
-### 2.5 Questions ouvertes
+### 2.5 Écrans
+
+Navigation par une barre d'onglets en bas de l'écran.
+
+| Route (après `#`)        | Écran | Fonctionnalités |
+| ------------------------ | ----- | --------------- |
+| `/`                      | **Saisie** : la liste des réalisations de la date choisie, puis en dessous le formulaire (date, exercice ou nouvel exercice avec son unité, valeur) | F1, F2, F3 |
+| `/history`               | **Historique**, onglet « Par date » | F4 |
+| `/history?view=exercise` | **Historique**, onglet « Par exercice » | F5 |
+| `/entries/$entryId`      | Modifier ou supprimer une réalisation (on y accède en touchant une réalisation dans une liste) | F6 |
+| `/exercises`             | Liste des exercices, avec leur unité et leur nombre de réalisations | F7 |
+| `/exercises/$exerciseId` | Renommer un exercice, changer son unité, le supprimer (confirmation avec le nombre de réalisations supprimées) | F7 |
+| `/backup`                | Sauvegarde : export et import JSON, avec le nombre d'exercices et de réalisations présents | F8 |
+
+Les confirmations (suppressions, import) utilisent la boîte de dialogue native du navigateur (`window.confirm`).
+
+### 2.6 Questions ouvertes
 
 _Aucune pour l'instant._
 
@@ -105,14 +121,42 @@ src/
 ├── router.tsx                 # instance du router
 ├── routeTree.gen.ts           # GÉNÉRÉ par le plugin router — ne pas éditer, mais committer
 ├── index.css                  # import Tailwind + thème (@theme)
-├── routes/                    # une route = un fichier
-│   ├── __root.tsx             # layout global (header, <Outlet />, page 404)
-│   └── index.tsx              # page d'accueil « / »
-├── lib/storage/               # couche de persistance localStorage
-│   ├── store.ts               # createStore
-│   ├── useStore.ts            # hook React
-│   ├── backup.ts              # export / import JSON
-│   └── store.test.ts
+├── routes/                    # une route = un fichier (écrans, voir §2.5)
+│   ├── __root.tsx             # layout global (<Outlet />, barre d'onglets, page 404)
+│   ├── index.tsx              # Saisie « / »
+│   ├── history.tsx            # Historique (search param `view`)
+│   ├── backup.tsx             # Sauvegarde
+│   ├── entries/$entryId.tsx   # modification d'une réalisation
+│   └── exercises/
+│       ├── index.tsx          # liste des exercices
+│       └── $exerciseId.tsx    # modification d'un exercice
+├── features/                  # code métier, par domaine
+│   ├── exercises/
+│   │   ├── types.ts           # Exercise, Unit, UNITS
+│   │   ├── store.ts           # exercisesStore
+│   │   ├── actions.ts         # create / update / delete (avec suppression des réalisations)
+│   │   ├── hooks.ts           # useSortedExercises, useExerciseMap
+│   │   └── components/UnitPicker.tsx
+│   ├── entries/
+│   │   ├── types.ts           # Entry
+│   │   ├── store.ts           # entriesStore
+│   │   ├── actions.ts         # add / update / delete (+ validation)
+│   │   ├── selectors.ts       # dernière valeur, regroupements par date / par exercice
+│   │   └── components/        # EntryForm (saisie), EntryRow / EntryList
+│   └── training.test.ts       # tests des règles métier
+├── components/                # composants transverses
+│   ├── ui/                    # Button, Field (+ inputClassName, ErrorMessage), Select, EmptyState
+│   ├── BottomNav.tsx          # barre d'onglets
+│   ├── PageHeader.tsx         # titre de page + bouton retour
+│   ├── useGoBack.ts           # retour arrière, avec une page de repli si pas d'historique
+│   └── icons.tsx              # icônes SVG
+├── lib/
+│   ├── format.ts              # nombres (virgule) et dates (YYYY-MM-DD local, libellés fr)
+│   └── storage/               # couche de persistance localStorage
+│       ├── store.ts           # createStore
+│       ├── useStore.ts        # hook React
+│       ├── backup.ts          # export / import JSON
+│       └── store.test.ts
 └── pwa/ReloadPrompt.tsx       # bannière de mise à jour de l'app
 ```
 
@@ -120,9 +164,11 @@ src/
 
 - **Routing par fichiers :** chaque fichier de `src/routes/` déclare une route via `createFileRoute('/chemin')`. Le plugin Vite régénère `routeTree.gen.ts` dès qu'un fichier est ajouté ou renommé (en dev comme au build).
   - `routes/exercises/index.tsx` → `/exercises`
-  - `routes/exercises/$id.tsx` → `/exercises/:id` (paramètre `id`)
+  - `routes/exercises/$exerciseId.tsx` → `/exercises/:exerciseId` (lu avec `Route.useParams()`)
+- **Search params :** validés par `validateSearch` dans la route (ex. `view` de `/history`), lus avec `Route.useSearch()`.
 - **Hash history** (`/#/exercises`) : GitHub Pages ne sait pas renvoyer `index.html` pour une URL profonde, donc un rechargement en mode history classique donnerait une 404. Le hash évite le problème.
-- **Layout :** `__root.tsx` contient le header, le conteneur principal (`max-w-md`, pensé mobile) et le composant 404.
+- **Layout :** `__root.tsx` contient le conteneur principal (`max-w-md`, pensé mobile), la barre d'onglets (`BottomNav`) et le composant 404. Chaque page affiche son titre avec `PageHeader`.
+- **Retour arrière :** `useGoBack(fallback)` revient à la page précédente, ou à `fallback` si la page a été ouverte directement.
 - **Devtools :** les devtools TanStack Router ne sont chargées qu'en dev.
 - Les liens se font avec `<Link to="...">`, typé : une route inexistante provoque une erreur TypeScript.
 
@@ -170,13 +216,14 @@ Hors React : `workoutsStore.get()`, `.set()`, `.reset()`, `.subscribe()`.
 Le navigateur peut vider le `localStorage` (stockage saturé, nettoyage du navigateur, désinstallation de la PWA). `backup.ts` fournit :
 
 - `exportBackup()` / `downloadBackup()` : un JSON de toutes les clés `cissoufit:*`
-- `importBackup(json)` : valide puis restaure. **Il faut recharger la page ensuite**, car les stores gardent leur cache.
+- `importBackup(json)` : valide le fichier, supprime toutes les clés `cissoufit:*` existantes, puis écrit celles de la sauvegarde. Les clés des autres apps ne sont pas touchées. **Il faut recharger la page ensuite**, car les stores gardent leur cache.
 
 #### Registre des stores
 
 | Clé (`cissoufit:…`) | Version | Contenu | Fichier |
 | ------------------- | ------- | ------- | ------- |
-| _aucun pour l'instant_ |      |         |         |
+| `exercises`         | 1       | `Exercise[]` — catalogue d'exercices | `src/features/exercises/store.ts` |
+| `entries`           | 1       | `Entry[]` — réalisations | `src/features/entries/store.ts` |
 
 ### 3.5 PWA
 
@@ -218,7 +265,7 @@ npm run typecheck # tsc -b
 ## 4. Conventions
 
 - **Langue :** l'interface, les commentaires et la documentation sont en français. Le code (identifiants) est en anglais.
-- **Organisation :** le code métier ira dans `src/features/<domaine>/` (store, types, composants). Les routes de `src/routes/` restent minces et assemblent les features.
+- **Organisation :** le code métier est dans `src/features/<domaine>/` : `types`, `store`, `actions` (écritures et validation, qui lèvent une `Error` avec un message en français affichable tel quel), `selectors` (fonctions pures), `hooks` et `components`. Les routes de `src/routes/` restent minces et assemblent les features.
 - **Données :** toute nouvelle clé de stockage passe par `createStore` et doit être ajoutée au [registre des stores](#registre-des-stores).
 - **Documentation :** toute évolution métier ou technique doit être reportée dans ce fichier.
 
@@ -236,3 +283,5 @@ npm run typecheck # tsc -b
 | 2026-10-30 | Exercices (catalogue) et réalisations dans deux stores séparés, liés par `exerciseId` | Renommer un exercice sans toucher à l'historique ; liste des exercices indépendante des saisies |
 | 2026-10-30 | Unité portée par l'exercice (`kg` / `min` / `km`), pas par chaque réalisation | Toutes les réalisations d'un même exercice sont comparables |
 | 2026-10-30 | Supprimer un exercice supprime ses réalisations (après confirmation) | Pas de réalisation orpheline |
+| 2026-10-30 | Confirmations par `window.confirm` | Simple, natif sur mobile, suffisant pour une app personnelle |
+| 2026-10-30 | Saisie numérique en `<input inputMode="decimal">` plutôt que `type="number"` | `type="number"` gère mal la virgule selon les navigateurs et la langue |

@@ -20,9 +20,13 @@ export function exportBackup(): Backup {
   return { app: 'cissoufit', exportedAt: new Date().toISOString(), entries }
 }
 
-/** Après un import, recharger la page : les stores gardent leurs valeurs en cache. */
+/**
+ * Remplace toutes les données de l'app par celles de la sauvegarde.
+ * Après un import, recharger la page : les stores gardent leurs valeurs en cache.
+ */
 export function importBackup(backup: unknown) {
   if (!isBackup(backup)) throw new Error('Fichier de sauvegarde invalide')
+  for (const key of Object.keys(exportBackup().entries)) localStorage.removeItem(key)
   for (const [key, value] of Object.entries(backup.entries)) {
     if (key.startsWith(STORAGE_PREFIX)) localStorage.setItem(key, value)
   }
