@@ -1,8 +1,8 @@
 name: Deploy to GitHub Pages
 
+# Déploiement manuel uniquement (Actions → Run workflow).
+# Remettre `push: branches: [main]` pour réactiver le déploiement automatique.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:

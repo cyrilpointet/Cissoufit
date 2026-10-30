@@ -49,7 +49,7 @@ Les données sont stockées sous `cissoufit:<key>` dans une enveloppe `{ version
 
 ## Déploiement
 
-Le workflow `.github/workflows/deploy.yml` lint, teste, build et publie sur GitHub Pages à chaque push sur `main`.
+Le workflow `.github/workflows/deploy.yml` lint, teste, build et publie sur GitHub Pages. Il est pour l'instant **manuel** (*Actions → Deploy to GitHub Pages → Run workflow*).
 Le base path (`/<nom-du-repo>/`) est injecté via la variable `BASE_PATH`.
 
 Pré-requis côté GitHub : *Settings → Pages → Source : GitHub Actions*.
