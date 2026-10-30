@@ -2,6 +2,8 @@
 
 Application (PWA) de suivi de mes exercices de fitness. Aucune donnée ne quitte le navigateur : tout est stocké dans le `localStorage`.
 
+📖 Documentation complète (besoins métier et fonctionnement technique) : [doc/documentation.md](doc/documentation.md)
+
 ## Stack
 
 - **React 19** + **TypeScript**, bundlé par **Vite**
