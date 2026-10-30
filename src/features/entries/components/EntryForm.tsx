@@ -51,10 +51,11 @@ export function EntryForm({ date, onDateChange }: EntryFormProps) {
     try {
       const exercise = isNew ? createExercise(newName, newUnit) : selected!
       addEntry({ exerciseId: exercise.id, date, value: parsedValue })
-      // On garde l'exercice sélectionné pour enchaîner les séries
-      setSelection(exercise.id)
+      // Réinitialise le formulaire (la date est conservée)
+      setSelection('')
       setNewName('')
-      setValue(toInputValue(parsedValue))
+      setNewUnit('kg')
+      setValue('')
       setError('')
     } catch (e) {
       setError((e as Error).message)

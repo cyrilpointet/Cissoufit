@@ -30,7 +30,11 @@ export default defineConfig({
         orientation: 'portrait',
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,ico,webmanifest}'],
+        // Pas de webmanifest ici : le plugin l'ajoute déjà au précache, et un doublon
+        // fait échouer silencieusement le précache (service worker actif mais vide).
+        globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
+        // Le premier chargement est contrôlé tout de suite par le service worker
+        clientsClaim: true,
       },
       devOptions: { enabled: false },
     }),

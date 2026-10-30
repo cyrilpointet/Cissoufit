@@ -69,10 +69,11 @@ Stores : `cissoufit:exercises` (`Exercise[]`) et `cissoufit:entries` (`Entry[]`)
 - **R3 — Pré-remplissage :** la valeur proposée est celle de la réalisation la plus récente de l'exercice (la date la plus récente, puis `createdAt` en cas d'égalité). Si l'exercice n'a jamais été réalisé, le champ est vide.
 - **R4 — Liste d'exercices :** on choisit dans le catalogue ou on crée un nouvel exercice. Si on essaie de créer un nom qui existe déjà (sans tenir compte de la casse), l'exercice existant est réutilisé.
 - **R5 — Date de saisie :** une réalisation est datée du jour par défaut. On peut choisir une date passée, en cas d'oubli, mais pas une date future.
-- **R6 — Plusieurs réalisations par jour :** un même exercice peut être enregistré autant de fois que voulu le même jour, par exemple pour plusieurs séries. Chaque réalisation est affichée séparément, dans l'ordre de saisie. Après un enregistrement, l'exercice reste sélectionné pour enchaîner les séries.
+- **R6 — Plusieurs réalisations par jour :** un même exercice peut être enregistré autant de fois que voulu le même jour, par exemple pour plusieurs séries. Chaque réalisation est affichée séparément, dans l'ordre de saisie.
 - **R7 — Modification :** une réalisation peut être modifiée (valeur et date) ou supprimée. Un exercice peut être renommé, en respectant l'unicité du nom, et son unité peut être changée.
 - **R8 — Suppression d'un exercice :** supprimer un exercice supprime aussi toutes ses réalisations. Avant de supprimer, l'app affiche un avertissement qui indique le nombre de réalisations concernées, et demande une confirmation.
 - **R9 — Sauvegarde :** un écran permet d'exporter toutes les données dans un fichier JSON (`cissoufit-YYYY-MM-DD.json`) et de les restaurer depuis un tel fichier. L'import **remplace** les données actuelles : l'app demande une confirmation avant, puis se recharge.
+- **R10 — Après enregistrement :** le formulaire de saisie est réinitialisé (exercice, nom et unité du nouvel exercice, valeur). La date choisie est conservée.
 
 ### 2.5 Écrans
 
@@ -229,7 +230,9 @@ Le navigateur peut vider le `localStorage` (stockage saturé, nettoyage du navig
 
 - Configurée dans `vite.config.ts` (`VitePWA`).
 - **Mise à jour :** `registerType: 'prompt'`. Quand une nouvelle version est déployée, `ReloadPrompt` affiche une bannière « Mettre à jour / Plus tard ». Aucun rechargement forcé, pour ne jamais interrompre une séance en cours.
-- **Hors ligne :** Workbox met en cache tous les assets du build (js, css, html, images, manifest).
+- **Hors ligne :** Workbox précache tous les assets du build (js, css, html, images). Toutes les navigations sont servies par `index.html` depuis le cache. Avec `clientsClaim`, la page est contrôlée par le service worker dès la première visite.
+  - ⚠️ Ne pas ajouter `webmanifest` à `globPatterns` : le plugin l'ajoute déjà au précache. Un doublon fait échouer le précache **sans erreur visible** : le service worker est actif mais vide, et l'app ne marche pas hors ligne.
+  - Pour vérifier : DevTools → Application → Cache Storage doit contenir `workbox-precache-v2-…` avec une trentaine d'entrées.
 - **Icônes :** générées au build depuis `public/logo.svg` (favicon, 64/192/512, maskable, apple-touch-icon), avec les balises `<link>` injectées dans `index.html`. Pour changer le logo, il suffit de remplacer ce fichier SVG.
 - **Manifest :** nom, couleurs (`#0f172a`), `display: standalone`, orientation portrait. `scope` et `start_url` suivent le base path.
 - Le service worker est **désactivé en dev**. Pour tester la PWA : `npm run build && npm run preview`.
@@ -283,5 +286,6 @@ npm run typecheck # tsc -b
 | 2026-10-30 | Exercices (catalogue) et réalisations dans deux stores séparés, liés par `exerciseId` | Renommer un exercice sans toucher à l'historique ; liste des exercices indépendante des saisies |
 | 2026-10-30 | Unité portée par l'exercice (`kg` / `min` / `km`), pas par chaque réalisation | Toutes les réalisations d'un même exercice sont comparables |
 | 2026-10-30 | Supprimer un exercice supprime ses réalisations (après confirmation) | Pas de réalisation orpheline |
+| 2026-10-30 | `clientsClaim` activé, manifest retiré de `globPatterns` | Correctif : le précache était vide, donc pas de mode hors ligne |
 | 2026-10-30 | Confirmations par `window.confirm` | Simple, natif sur mobile, suffisant pour une app personnelle |
 | 2026-10-30 | Saisie numérique en `<input inputMode="decimal">` plutôt que `type="number"` | `type="number"` gère mal la virgule selon les navigateurs et la langue |
